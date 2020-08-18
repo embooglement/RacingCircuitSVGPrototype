@@ -107,11 +107,20 @@ function getPathPoints() {
   for (let i = 0; i < numPoints; ++i) {
     const radius = getRadius();
     if (prevRadius !== null) {
-      const diff = Math.abs(radius - prevRadius);
-      if (diff < getMinDeltaRadius()) {
-        radius = prevRadius - getMinDeltaRadius();
-      } else if (diff > getMaxDeltaRadius()) {
-        radius = prevRadius + getMaxDeltaRadius();
+      const diff = radius - prevRadius;
+
+      if (diff >= 0) {
+        if (diff < getMinDeltaRadius()) {
+          radius = prevRadius + getMinDeltaRadius();
+        } else if (diff > getMaxDeltaRadius()) {
+          radius = prevRadius + getMaxDeltaRadius();
+        }
+      } else if (diff < 0) {
+        if (-diff < getMinDeltaRadius()) {
+          radius = prevRadius - getMinDeltaRadius();
+        } else if (-diff > getMaxDeltaRadius()) {
+          radius = prevRadius - getMaxDeltaRadius();
+        }
       }
     }
 
