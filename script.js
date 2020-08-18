@@ -103,6 +103,25 @@ function getEllipticalArcCommand(point, prevPoint) {
   return buildCommand('A', pt(radii), toDegrees(angle), largeSweepFlag, sweepFlag, pt(point));
 }
 
+function getSmoothBezierControlPoint(point, prevPoint) {
+  // TODO(kevin): think about handedness of the control point (i.e. should it
+  // always be outside the shape?).
+
+  const angle = Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x);
+  const dist = distance(point, prevPoint);
+  const radius = getArcRadius();
+
+  const x = prevPoint.x + (dist / 2 * Math.cos(angle));
+  const y = prevPoint.y + (radius + dist / 2 * Math.sin(angle));
+
+  return { x, y };
+}
+
+function getSmoothCubicBezierCommand(point, prevPoint) {
+  const controlPoint = getSmoothBezierControlPoint(point, prevPoint);
+  return buildCommand('S', pt(controlPoint), pt(point));
+}
+
 function getPathCommands(points) {
   const firstPoint = points[0];
   points = points.slice(1);
@@ -112,13 +131,25 @@ function getPathCommands(points) {
   for (const point of points) {
     // TODO(kevin): dynamically choose how to connect two points? i.e. use
     // elliptical arcs AND bezier curves.
-    const command = getEllipticalArcCommand(point, prevPoint);
+    // const command = getEllipticalArcCommand(point, prevPoint);
+    const command = getSmoothCubicBezierCommand(point, prevPoint);
     commands.push(command);
     prevPoint = point;
   }
 
   commands.push(buildCommand('z'));
   return commands.join(' ');
+}
+
+function getControlPointElement(point, fill) {
+  const circle = document.createElementNS(NS, 'circle');
+  circle.setAttribute('cx', point.x);
+  circle.setAttribute('cy', point.y);
+  circle.setAttribute('r', 0.01);
+  circle.setAttribute('fill', fill);
+  circle.classList.add('control-point');
+
+  return circle;
 }
 
 function getCircuitElement() {
@@ -132,6 +163,7 @@ function getCircuitElement() {
   polygon.setAttribute('stroke-width', 0.005);
   polygon.setAttribute('stroke-dasharray', '0.01 0.01')
   polygon.setAttribute('fill', 'transparent');
+  polygon.setAttribute('stroke', 'blue');
   polygon.classList.add('straight-connections');
   g.appendChild(polygon);
 
@@ -141,14 +173,19 @@ function getCircuitElement() {
   g.appendChild(path);
 
   // Show the control points
-  for (const point of points) {
-    const circle = document.createElementNS(NS, 'circle');
-    circle.setAttribute('cx', point.x);
-    circle.setAttribute('cy', point.y);
-    circle.setAttribute('r', 0.01);
-    circle.classList.add('control-point');
+  let prevPoint = null;
+  for (let i = 0; i < points.length; ++i) {
+    const point = points[i];
+    const controlPointElement = getControlPointElement(point, 'red');
+    g.appendChild(controlPointElement);
 
-    g.appendChild(circle);
+    if (prevPoint) {
+      const bezierControlPoint = getSmoothBezierControlPoint(point, prevPoint);
+      const bezierControlPointElement = getControlPointElement(bezierControlPoint, 'orange');
+      g.appendChild(bezierControlPointElement);
+    }
+
+    prevPoint = point;
   }
 
   return g;
