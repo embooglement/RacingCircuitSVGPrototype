@@ -4,7 +4,7 @@ function rand(min, max) {
   return (Math.random() * (max - min)) + min;
 }
 
-function getSVG() {
+function getSVGElement() {
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('xmlns', NS);
   svg.setAttribute('viewBox', '0 0 1 1');
@@ -13,19 +13,7 @@ function getSVG() {
   return svg;
 }
 
-function getCircuitOld() {
-  const circle = document.createElementNS(NS, 'circle');
-  circle.setAttribute('cx', 0.5);
-  circle.setAttribute('cy', 0.5);
-  circle.setAttribute('r', rand(0.15, 0.4));
-  circle.setAttribute('stroke', 'black');
-  circle.setAttribute('stroke-width', 0.01);
-  circle.setAttribute('fill', 'transparent');
-
-  return circle;
-}
-
-function getPath() {
+function getPathElement() {
   const path = document.createElementNS(NS, 'path');
   path.setAttribute('stroke', 'black');
   path.setAttribute('stroke-width', 0.01);
@@ -33,7 +21,7 @@ function getPath() {
   return path;
 }
 
-function getCircuit() {
+function getPathCommands() {
   const d = `
     M 0.10,0.30
     A .20,.20 0,0,1 .50,.30
@@ -43,15 +31,19 @@ function getCircuit() {
     z
   `;
 
-  const path = getPath();
-  path.setAttribute('d', d);
+  return d;
+}
+
+function getCircuitElement() {
+  const path = getPathElement();
+  path.setAttribute('d', getPathCommands());
   return path;
 
 }
 
 function generateNewCircuitSVG() {
-  const svg = getSVG();
-  const circuit = getCircuit();
+  const svg = getSVGElement();
+  const circuit = getCircuitElement();
   svg.appendChild(circuit);
   return svg;
 }
