@@ -36,12 +36,6 @@ function toDegrees(radians) {
   return radians * 180 / Math.PI;
 }
 
-function clamp(value, min, max) {
-  if (value < min) return min;
-  else if (value > max) return max;
-  else return value;
-}
-
 function buildCommand(command, ...args) {
   let c = ' ' + command;
   for (const arg of args) {
@@ -89,7 +83,6 @@ function getPathPoints() {
 }
 
 function getEllipticalArcCommand(point, prevPoint) {
-
   // Whether or not to use the larger elliptical curve between two points. We
   // never want this turned on because the points are close together and we
   // want shorter paths connecting them.
