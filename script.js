@@ -104,15 +104,17 @@ function getEllipticalArcCommand(point, prevPoint) {
 }
 
 function getSmoothBezierControlPoint(point, prevPoint) {
-  // TODO(kevin): think about handedness of the control point (i.e. should it
-  // always be outside the shape?).
-
-  const angle = Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x);
-  const dist = distance(point, prevPoint);
+  // Find the 3rd point in an isosceles triangle, where `point` and `prevPoint`
+  // are the base. The 3rd point's distance from the base is `radius`. A
+  // positive `radius` projects towards the center of the track, a negative
+  // radius projects outwards.
+  const angle = Math.PI / 2 + Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x);
+  const xDist = point.x - prevPoint.x;
+  const yDist = point.y - prevPoint.y;
   const radius = getArcRadius();
 
-  const x = prevPoint.x + (dist / 2 * Math.cos(angle));
-  const y = prevPoint.y + (radius + dist / 2 * Math.sin(angle));
+  const x = prevPoint.x + xDist / 2 - radius * Math.cos(angle);
+  const y = prevPoint.y + yDist / 2 - radius * Math.sin(angle);
 
   return { x, y };
 }
@@ -125,6 +127,7 @@ function getSmoothCubicBezierCommand(point, prevPoint) {
 function getPathCommands(points) {
   const firstPoint = points[0];
   points = points.slice(1);
+  points.push(firstPoint);
 
   let commands = [buildCommand('M', pt(firstPoint))];
   let prevPoint = firstPoint;
