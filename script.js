@@ -7,13 +7,17 @@ function rand(min, max) {
 function generateNewCircuitSVG() {
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('xmlns', NS);
-  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('viewBox', '0 0 1 1');
+  svg.setAttribute('width', 1);
+  svg.setAttribute('height', 1);
 
   const circle = document.createElementNS(NS, 'circle');
-  circle.setAttribute('cx', 50);
-  circle.setAttribute('cy', 50);
-  circle.setAttribute('r', rand(15, 40));
-  circle.setAttribute('fill', 'purple');
+  circle.setAttribute('cx', 0.5);
+  circle.setAttribute('cy', 0.5);
+  circle.setAttribute('r', rand(0.15, 0.4));
+  circle.setAttribute('stroke', 'purple');
+  circle.setAttribute('stroke-width', 0.01);
+  circle.setAttribute('fill', 'transparent');
 
   svg.appendChild(circle);
 
