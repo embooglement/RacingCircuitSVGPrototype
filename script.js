@@ -13,7 +13,7 @@ function getSVG() {
   return svg;
 }
 
-function getCircuit() {
+function getCircuitOld() {
   const circle = document.createElementNS(NS, 'circle');
   circle.setAttribute('cx', 0.5);
   circle.setAttribute('cy', 0.5);
@@ -23,6 +23,30 @@ function getCircuit() {
   circle.setAttribute('fill', 'transparent');
 
   return circle;
+}
+
+function getPath() {
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('stroke', 'black');
+  path.setAttribute('stroke-width', 0.01);
+  path.setAttribute('fill', 'transparent');
+  return path;
+}
+
+function getCircuit() {
+  const d = `
+    M 0.10,0.30
+    A .20,.20 0,0,1 .50,.30
+    A .20,.20 0,0,1 .90,.30
+    Q .90,.60 .50,.90
+    Q .10,.60 .10,.30
+    z
+  `;
+
+  const path = getPath();
+  path.setAttribute('d', d);
+  return path;
+
 }
 
 function generateNewCircuitSVG() {
