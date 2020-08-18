@@ -132,10 +132,22 @@ function getCircuitElement() {
   const g = document.createElementNS(NS, 'g');
   const points = getPathPoints();
 
+  // Show the circuit if nothing but straight lines connected the points
+  const polygonPoints = points.map(pt).join(' ');
+  const polygon = document.createElementNS(NS, 'polygon');
+  polygon.setAttribute('points', polygonPoints);
+  polygon.setAttribute('stroke-width', 0.005);
+  polygon.setAttribute('stroke-dasharray', '0.01 0.01')
+  polygon.setAttribute('fill', 'transparent');
+  polygon.classList.add('straight-connections');
+  g.appendChild(polygon);
+
+  // Generate the actual race circuit's path
   const path = getPathElement(points);
   path.setAttribute('d', getPathCommands(points));
   g.appendChild(path);
 
+  // Show the control points
   for (const point of points) {
     const circle = document.createElementNS(NS, 'circle');
     circle.setAttribute('cx', point.x);
@@ -162,6 +174,7 @@ function initializeInputs() {
   const maxRadiusInput = document.getElementById('max-radius');
   const arcRadiusInput = document.getElementById('arc-radius');
   const showControlPointsInput = document.getElementById('show-control-points');
+  const showStraightConnectionsInput = document.getElementById('show-straight-connections');
 
   numPoints = parseInt(numPointsInput.value, 10);
   minRadius = parseFloat(minRadiusInput.value);
@@ -197,6 +210,20 @@ function initializeInputs() {
     setShowControlPoints();
   });
   setShowControlPoints();
+
+  const setShowStraightConnections = () => {
+    const circuit = document.getElementById('circuit');
+    if (showStraightConnectionsInput.checked) {
+      circuit.classList.add('show-straight-connections');
+    } else {
+      circuit.classList.remove('show-straight-connections');
+    }
+  };
+
+  showStraightConnectionsInput.addEventListener('change', (e) => {
+    setShowStraightConnections();
+  });
+  setShowStraightConnections();
 }
 
 function initalizeCircuitGenerator() {

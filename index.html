@@ -33,6 +33,12 @@
       #circuit.show-control-points svg .control-point {
         fill: red;
       }
+      #circuit svg .straight-connections {
+        stroke: transparent;
+      }
+      #circuit.show-straight-connections svg .straight-connections {
+        stroke: blue;
+      }
     </style>
   </head>
   <body>
@@ -45,6 +51,9 @@
       <div class="controls-input">
         <label>
           Display Control Points: <input id="show-control-points" type="checkbox" checked />
+        </label>
+        <label>
+          Show Straight Connections: <input id="show-straight-connections" type="checkbox" checked />
         </label>
       </div>
       <div class="controls-input">
