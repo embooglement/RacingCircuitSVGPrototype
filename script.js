@@ -2,11 +2,8 @@ const NS = 'http://www.w3.org/2000/svg';
 let numPoints = 0;
 let minRadius = 0;
 let maxRadius = 0;
-
-// TODO(kevin): maybe remove this
-let arcRadius = 0;
-
-let showControlPoints = true;
+let arcRadius = 0; // TODO(kevin): maybe remove this
+let bezierArcMethod = '';
 
 function getNumPoints() {
   return numPoints;
@@ -18,6 +15,10 @@ function getRadius() {
 
 function getArcRadius() {
   return arcRadius;
+}
+
+function getBezierArcMethod() {
+  return bezierArcMethod;
 }
 
 function rand(min, max) {
@@ -65,14 +66,26 @@ function getPathElement() {
 }
 
 function getPathPoints() {
+  const arcMethod = getBezierArcMethod();
   const numPoints = getNumPoints();
   const deltaTheta = 2 * Math.PI / numPoints;
+
+  if (arcMethod === 'alternate' && numPoints % 2 === 0) {
+    console.warn('Alternating bezier curve directions only works well with an odd number of points');
+  }
 
   let points = [];
   let bezierControlPoints = [];
   let theta = 0;
   let prevPoint = null;
-  let towardsCenter = true;
+  let towardsCenter = false;
+  let shouldAlternate = false;
+
+  if (arcMethod === 'inwards') {
+    towardsCenter = true;
+  } else if (arcMethod === 'alternate') {
+    shouldAlternate = true;
+  }
 
   for (let i = 0; i < numPoints; ++i) {
     const radius = getRadius();
@@ -85,6 +98,10 @@ function getPathPoints() {
     if (i > 0) {
       const controlPoint = getBezierControlPoint(point, points[i - 1], towardsCenter);
       bezierControlPoints.push(controlPoint);
+    }
+
+    if (shouldAlternate) {
+      towardsCenter = !towardsCenter;
     }
 
     theta += deltaTheta;
@@ -220,6 +237,7 @@ function initializeInputs() {
   const arcRadiusInput = document.getElementById('arc-radius');
   const showControlPointsInput = document.getElementById('show-control-points');
   const showStraightConnectionsInput = document.getElementById('show-straight-connections');
+  const bezierArcMethodInput = document.getElementById('bezier-arc-method');
 
   numPoints = parseInt(numPointsInput.value, 10);
   minRadius = parseFloat(minRadiusInput.value);
@@ -269,6 +287,15 @@ function initializeInputs() {
     setShowStraightConnections();
   });
   setShowStraightConnections();
+
+  const setBezierArcMethod = () => {
+    bezierArcMethod = bezierArcMethodInput.value;
+  };
+
+  bezierArcMethodInput.addEventListener('change', (e) => {
+    setBezierArcMethod();
+  });
+  setBezierArcMethod();
 }
 
 function initalizeCircuitGenerator() {
