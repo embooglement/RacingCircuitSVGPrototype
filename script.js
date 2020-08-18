@@ -2,7 +2,9 @@ const NS = 'http://www.w3.org/2000/svg';
 let numPoints = 0;
 let minRadius = 0;
 let maxRadius = 0;
-let arcRadius = 0; // TODO(kevin): maybe remove this
+let minDeltaRadius = 0;
+let maxDeltaRadiues = 0;
+let arcRadius = 0;
 let bezierArcMethod = '';
 
 function getNumPoints() {
@@ -11,6 +13,14 @@ function getNumPoints() {
 
 function getRadius() {
   return rand(minRadius, maxRadius);
+}
+
+function getMinDeltaRadius() {
+  return minDeltaRadius;
+}
+
+function getMaxDeltaRadius() {
+  return maxDeltaRadius;
 }
 
 function getArcRadius() {
@@ -31,6 +41,12 @@ function pt(point) {
 
 function distance(point1, point2) {
   return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+}
+
+function clamp(value, min, max) {
+  if (value < min) return min;
+  else if (value > max) return max;
+  else return value;
 }
 
 function toDegrees(radians) {
@@ -87,8 +103,18 @@ function getPathPoints() {
     shouldAlternate = true;
   }
 
+  let prevRadius = null;
   for (let i = 0; i < numPoints; ++i) {
     const radius = getRadius();
+    if (prevRadius !== null) {
+      const diff = Math.abs(radius - prevRadius);
+      if (diff < getMinDeltaRadius()) {
+        radius = prevRadius - getMinDeltaRadius();
+      } else if (diff > getMaxDeltaRadius()) {
+        radius = prevRadius + getMaxDeltaRadius();
+      }
+    }
+
     const x = radius * Math.cos(theta) + 0.5;
     const y = radius * Math.sin(theta) + 0.5;
 
@@ -211,6 +237,17 @@ function getCircuitElement() {
 
   // Show the control points
   for (const point of points) {
+    const radialLine = document.createElementNS(NS, 'line');
+    radialLine.setAttribute('x1', 0.5);
+    radialLine.setAttribute('y1', 0.5);
+    radialLine.setAttribute('x2', point.x);
+    radialLine.setAttribute('y2', point.y);
+    radialLine.setAttribute('stroke', 'green');
+    radialLine.setAttribute('stroke-width', 0.005);
+    radialLine.setAttribute('stroke-dasharray', '0.01 0.01');
+    radialLine.classList.add('radial-line');
+    g.appendChild(radialLine);
+
     const controlPointElement = getControlPointElement(point, 'red');
     g.appendChild(controlPointElement);
   }
@@ -234,14 +271,19 @@ function initializeInputs() {
   const numPointsInput = document.getElementById('num-points');
   const minRadiusInput = document.getElementById('min-radius');
   const maxRadiusInput = document.getElementById('max-radius');
+  const minDeltaRadiusInput = document.getElementById('min-delta-radius');
+  const maxDeltaRadiusInput = document.getElementById('max-delta-radius');
   const arcRadiusInput = document.getElementById('arc-radius');
   const showControlPointsInput = document.getElementById('show-control-points');
   const showStraightConnectionsInput = document.getElementById('show-straight-connections');
+  const showRadialLinesInput = document.getElementById('show-radial-lines');
   const bezierArcMethodInput = document.getElementById('bezier-arc-method');
 
   numPoints = parseInt(numPointsInput.value, 10);
   minRadius = parseFloat(minRadiusInput.value);
   maxRadius = parseFloat(maxRadiusInput.value);
+  minDeltaRadius = parseFloat(minDeltaRadiusInput.value);
+  maxDeltaRadius = parseFloat(maxDeltaRadiusInput.value);
   arcRadius = parseFloat(arcRadiusInput.value);
 
   numPointsInput.addEventListener('change', (e) => {
@@ -254,6 +296,14 @@ function initializeInputs() {
 
   maxRadiusInput.addEventListener('change', (e) => {
     maxRadius = parseFloat(maxRadiusInput.value);
+  });
+
+  minDeltaRadiusInput.addEventListener('change', (e) => {
+    minDeltaRadius = parseFloat(minDeltaRadiusInput.value);
+  });
+
+  maxDeltaRadiusInput.addEventListener('change', (e) => {
+    maxDeltaRadius = parseFloat(maxDeltaRadiusInput.value);
   });
 
   arcRadiusInput.addEventListener('change', (e) => {
@@ -287,6 +337,20 @@ function initializeInputs() {
     setShowStraightConnections();
   });
   setShowStraightConnections();
+
+  const setShowRadialLines = () => {
+    const circuit = document.getElementById('circuit');
+    if (showRadialLinesInput.checked) {
+      circuit.classList.add('show-radial-lines');
+    } else {
+      circuit.classList.remove('show-radial-lines');
+    }
+  };
+
+  showRadialLinesInput.addEventListener('change', (e) => {
+    setShowRadialLines();
+  });
+  setShowRadialLines();
 
   const setBezierArcMethod = () => {
     bezierArcMethod = bezierArcMethodInput.value;

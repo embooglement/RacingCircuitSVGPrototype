@@ -42,29 +42,47 @@
       #circuit.show-straight-connections svg .straight-connections {
         opacity: 1;
       }
+
+      #circuit svg .radial-line {
+        opacity: 0;
+      }
+      #circuit.show-radial-lines svg .radial-line {
+        opacity: 1;
+      }
     </style>
   </head>
   <body>
     <div class="controls">
       <div class="controls-input">
         <label>
-          # of Control Points: <input id="num-points" type="number" value="10" min="10" />
+          # of Control Points: <input id="num-points" type="number" value="15" min="10" />
         </label>
       </div>
       <div class="controls-input">
         <label>
-          Display Control Points: <input id="show-control-points" type="checkbox" checked />
+          <input id="show-control-points" type="checkbox" checked /> Show Control Points
         </label>
         <label>
-          Show Straight Connections: <input id="show-straight-connections" type="checkbox" checked />
+          <input id="show-straight-connections" type="checkbox" checked /> Show Straight Circuit
+        </label>
+        <label>
+          <input id="show-radial-lines" type="checkbox" checked /> Show Radial Lines
         </label>
       </div>
       <div class="controls-input">
         <label>
-          Min Radius: <input id="min-radius" type="number" value="0.1" min="0.01" max="0.5" step="0.01" />
+          Min Radius: <input id="min-radius" type="number" value="0.15" min="0.01" max="0.5" step="0.01" />
         </label>
         <label>
           Max Radius: <input id="max-radius" type="number" value="0.45" min="0.01" max="0.5" step="0.01" />
+        </label>
+      </div>
+      <div class="controls-input">
+        <label>
+          Min &#916;Radius: <input id="min-delta-radius" type="number" value="0.05" min="0.01" max="0.5" step="0.01" />
+        </label>
+        <label>
+          Max &#916;Radius: <input id="max-delta-radius" type="number" value="0.1" min="0.01" max="0.5" step="0.01" />
         </label>
       </div>
       <div class="controls-input">
@@ -74,9 +92,9 @@
         <label>
           Bezier Arc Method:
           <select id="bezier-arc-method">
-            <option value="inwards" selected>Inwards</option>
+            <option value="alternate" selected>Alternate</option>
+            <option value="inwards">Inwards</option>
             <option value="outwards">Outwards</option>
-            <option value="alternate">Alternate</option>
           </select>
         </label>
       </div>
