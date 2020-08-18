@@ -69,17 +69,31 @@ function getPathPoints() {
   const deltaTheta = 2 * Math.PI / numPoints;
 
   let points = [];
+  let bezierControlPoints = [];
   let theta = 0;
+  let prevPoint = null;
+  let towardsCenter = true;
 
   for (let i = 0; i < numPoints; ++i) {
     const radius = getRadius();
     const x = radius * Math.cos(theta) + 0.5;
     const y = radius * Math.sin(theta) + 0.5;
-    points.push({ x, y });
+
+    const point = { x, y };
+    points.push(point);
+
+    if (i > 0) {
+      const controlPoint = getBezierControlPoint(point, points[i - 1], towardsCenter);
+      bezierControlPoints.push(controlPoint);
+    }
+
     theta += deltaTheta;
   }
 
-  return points;
+  const controlPoint = getBezierControlPoint(points[points.length - 1], points[0], towardsCenter);
+  bezierControlPoints.push(controlPoint);
+
+  return { points, bezierControlPoints };
 }
 
 function getEllipticalArcCommand(point, prevPoint) {
@@ -103,41 +117,44 @@ function getEllipticalArcCommand(point, prevPoint) {
   return buildCommand('A', pt(radii), toDegrees(angle), largeSweepFlag, sweepFlag, pt(point));
 }
 
-function getSmoothBezierControlPoint(point, prevPoint) {
+function getBezierControlPoint(point, prevPoint, towardsCenter) {
   // Find the 3rd point in an isosceles triangle, where `point` and `prevPoint`
   // are the base. The 3rd point's distance from the base is `radius`. A
   // positive `radius` projects towards the center of the track, a negative
   // radius projects outwards.
-  const angle = Math.PI / 2 + Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x);
+
+  const angle = Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x);
+  const projectedAngle = towardsCenter ? angle + Math.PI / 2 : angle - Math.PI / 2;
   const xDist = point.x - prevPoint.x;
   const yDist = point.y - prevPoint.y;
   const radius = getArcRadius();
 
-  const x = prevPoint.x + xDist / 2 - radius * Math.cos(angle);
-  const y = prevPoint.y + yDist / 2 - radius * Math.sin(angle);
+  const x = prevPoint.x + xDist / 2 + (radius * Math.cos(projectedAngle));
+  const y = prevPoint.y + yDist / 2 + (radius * Math.sin(projectedAngle));
 
   return { x, y };
 }
 
-function getSmoothCubicBezierCommand(point, prevPoint) {
-  const controlPoint = getSmoothBezierControlPoint(point, prevPoint);
-  return buildCommand('S', pt(controlPoint), pt(point));
+function getSmoothCubicBezierCommand(point, bezierControlPoint) {
+  return buildCommand('S', pt(bezierControlPoint), pt(point));
 }
 
-function getPathCommands(points) {
+function getPathCommands({ points, bezierControlPoints }) {
   const firstPoint = points[0];
   points = points.slice(1);
   points.push(firstPoint);
 
   let commands = [buildCommand('M', pt(firstPoint))];
-  let prevPoint = firstPoint;
-  for (const point of points) {
+
+  for (let i = 0; i < points.length; ++i) {
+    const point = points[i];
+    const bezierControlPoint = bezierControlPoints[i];
+
     // TODO(kevin): dynamically choose how to connect two points? i.e. use
     // elliptical arcs AND bezier curves.
     // const command = getEllipticalArcCommand(point, prevPoint);
-    const command = getSmoothCubicBezierCommand(point, prevPoint);
+    const command = getSmoothCubicBezierCommand(point, bezierControlPoint);
     commands.push(command);
-    prevPoint = point;
   }
 
   commands.push(buildCommand('z'));
@@ -157,7 +174,7 @@ function getControlPointElement(point, fill) {
 
 function getCircuitElement() {
   const g = document.createElementNS(NS, 'g');
-  const points = getPathPoints();
+  const { points, bezierControlPoints } = getPathPoints();
 
   // Show the circuit if nothing but straight lines connected the points
   const polygonPoints = points.map(pt).join(' ');
@@ -172,23 +189,18 @@ function getCircuitElement() {
 
   // Generate the actual race circuit's path
   const path = getPathElement(points);
-  path.setAttribute('d', getPathCommands(points));
+  path.setAttribute('d', getPathCommands({ points, bezierControlPoints }));
   g.appendChild(path);
 
   // Show the control points
-  let prevPoint = null;
-  for (let i = 0; i < points.length; ++i) {
-    const point = points[i];
+  for (const point of points) {
     const controlPointElement = getControlPointElement(point, 'red');
     g.appendChild(controlPointElement);
+  }
 
-    if (prevPoint) {
-      const bezierControlPoint = getSmoothBezierControlPoint(point, prevPoint);
-      const bezierControlPointElement = getControlPointElement(bezierControlPoint, 'orange');
-      g.appendChild(bezierControlPointElement);
-    }
-
-    prevPoint = point;
+  for (const bezierControlPoint of bezierControlPoints) {
+    const controlPointElement = getControlPointElement(bezierControlPoint, 'orange');
+    g.appendChild(controlPointElement);
   }
 
   return g;
