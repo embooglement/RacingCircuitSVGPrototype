@@ -6,6 +6,8 @@ let maxRadius = 0;
 // TODO(kevin): maybe remove this
 let arcRadius = 0;
 
+let showControlPoints = true;
+
 function getNumPoints() {
   return numPoints;
 }
@@ -134,13 +136,12 @@ function getCircuitElement() {
   path.setAttribute('d', getPathCommands(points));
   g.appendChild(path);
 
-
   for (const point of points) {
     const circle = document.createElementNS(NS, 'circle');
     circle.setAttribute('cx', point.x);
     circle.setAttribute('cy', point.y);
     circle.setAttribute('r', 0.01);
-    circle.setAttribute('fill', 'red');
+    circle.classList.add('control-point');
 
     g.appendChild(circle);
   }
@@ -160,6 +161,7 @@ function initializeInputs() {
   const minRadiusInput = document.getElementById('min-radius');
   const maxRadiusInput = document.getElementById('max-radius');
   const arcRadiusInput = document.getElementById('arc-radius');
+  const showControlPointsInput = document.getElementById('show-control-points');
 
   numPoints = parseInt(numPointsInput.value, 10);
   minRadius = parseFloat(minRadiusInput.value);
@@ -181,6 +183,20 @@ function initializeInputs() {
   arcRadiusInput.addEventListener('change', (e) => {
     arcRadius = parseFloat(arcRadiusInput.value);
   });
+
+  const setShowControlPoints = () => {
+    const circuit = document.getElementById('circuit');
+    if (showControlPointsInput.checked) {
+      circuit.classList.add('show-control-points');
+    } else {
+      circuit.classList.remove('show-control-points');
+    }
+  };
+
+  showControlPointsInput.addEventListener('change', (e) => {
+    setShowControlPoints();
+  });
+  setShowControlPoints();
 }
 
 function initalizeCircuitGenerator() {
