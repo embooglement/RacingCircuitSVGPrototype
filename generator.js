@@ -110,8 +110,8 @@ function getPolygonPathPoints() {
     }
 
     for (let j = 0; j < numPointsPerSide; ++j) {
-      const polygonX = lerp(start.x, end.x, j / (numPointsPerSide - 1));
-      const polygonY = lerp(start.y, end.y, j / (numPointsPerSide - 1));
+      const polygonX = lerp(start.x, end.x, j / numPointsPerSide);
+      const polygonY = lerp(start.y, end.y, j / numPointsPerSide);
       const angle = Math.atan2(polygonY - 0.5, polygonX - 0.5);
       const radius = getRadius(prevRadius);
       const displacement = Math.abs(radius - polygonRadius);
