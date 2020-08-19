@@ -209,12 +209,7 @@ function getCircuitElement() {
   polygon.classList.add('straight-connections');
   g.appendChild(polygon);
 
-  // Generate the actual race circuit's path
-  const path = getPathElement(points);
-  path.setAttribute('d', getPathCommands({ points, bezierControlPoints }));
-  g.appendChild(path);
-
-  // Show the control points
+  // Generate radial lines from the origin to the control points
   for (const point of points) {
     const radialLine = document.createElementNS(NS, 'line');
     radialLine.setAttribute('x1', 0.5);
@@ -226,7 +221,15 @@ function getCircuitElement() {
     radialLine.setAttribute('stroke-dasharray', '0.01 0.01');
     radialLine.classList.add('radial-line');
     g.appendChild(radialLine);
+  }
 
+  // Generate the actual race circuit's path
+  const path = getPathElement(points);
+  path.setAttribute('d', getPathCommands({ points, bezierControlPoints }));
+  g.appendChild(path);
+
+  // Show the control points
+  for (const point of points) {
     const controlPointElement = getControlPointElement(point, 'red');
     g.appendChild(controlPointElement);
   }
