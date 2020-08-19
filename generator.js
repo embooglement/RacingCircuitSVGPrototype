@@ -92,7 +92,7 @@ function getPolygonPathPoints() {
   const polygonRadius = getPolygonRadius();
 
   const numPoints = getNumPoints();
-  const numPointsPerSide = Math.round(numPoints / numSides);
+  const numPointsPerSide = Math.floor(numPoints / numSides);
   let theta = rand(0, Math.PI / 2);
   let deltaTheta = 2 * Math.PI / numSides;
   let points = [];
