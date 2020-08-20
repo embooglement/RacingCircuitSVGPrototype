@@ -210,7 +210,8 @@ function getCircuitElement() {
   g.appendChild(polygon);
 
   // Generate radial lines from the origin to the control points
-  for (const point of points) {
+  for (let i = 0; i < points.length; ++i) {
+    const point = points[i];
     const radialLine = document.createElementNS(NS, 'line');
     radialLine.setAttribute('x1', 0.5);
     radialLine.setAttribute('y1', 0.5);
@@ -219,6 +220,7 @@ function getCircuitElement() {
     radialLine.setAttribute('stroke', 'green');
     radialLine.setAttribute('stroke-width', 0.005);
     radialLine.setAttribute('stroke-dasharray', '0.01 0.01');
+    radialLine.setAttribute('stroke-dashoffset', (i % 2) * 0.01);
     radialLine.classList.add('radial-line');
     g.appendChild(radialLine);
   }
